@@ -34,6 +34,15 @@
     border:3px solid #fff; box-shadow:0 0 0 1.5px rgba(0,0,0,.45), 0 1px 4px rgba(0,0,0,.4);
   }
   .pin-dot.check { border-style:dashed; border-color:#fffbe8; }
+  /* 立ち寄り先は物件と区別するため四角 */
+  .pin-sq {
+    width:14px; height:14px; border-radius:3px;
+    border:3px solid #fff; box-shadow:0 0 0 1.5px rgba(0,0,0,.45), 0 1px 4px rgba(0,0,0,.4);
+  }
+  .legend .sq { display:inline-block; width:12px; height:12px; border-radius:3px;
+                margin-right:7px; vertical-align:middle; border:2px solid #fff;
+                box-shadow:0 0 0 1px rgba(0,0,0,.35); }
+  .legend .sec { display:block; margin-top:7px; padding-top:6px; border-top:1px solid #eee; }
 
   .tip-label {
     background:rgba(255,255,255,.94); border:1px solid #8a8a8a; border-radius:4px;
@@ -104,7 +113,8 @@ var COLOR = {
   urban:  "#c0392b",  // 都会派・超高層
   office: "#8e44ad",  // オフィス
   extra:  "#e67e22",  // 追加候補（カテゴリ未指定）
-  other:  "#7f8c8d"   // その他
+  other:  "#7f8c8d",  // その他
+  stop:   "#00897b"   // 立ち寄り先（モール・スーパー）※物件ではないので四角いピン
 };
 
 var CATNAME = {
@@ -113,7 +123,8 @@ var CATNAME = {
   urban:  ["都会派・超高層",            "Urban high-rise"],
   office: ["オフィス",                  "Office"],
   extra:  ["追加候補",                  "Additional"],
-  other:  ["その他",                    "Other"]
+  other:  ["その他",                    "Other"],
+  stop:   ["立ち寄り先",                "Stop along the way"]
 };
 
 /* 密集していて全体表示では個別ラベルが入らないため、ズームで3段階に切り替える。
@@ -228,7 +239,36 @@ var places = [
     body:"<div>イスカンダル・プテリのタウンシップ。ピンは<b>戸建てが並ぶ街区</b>を指しています。</div>"+
          "<div style='color:#666'>A township in Iskandar Puteri. The pin marks the landed-housing precinct.</div>"+
          "<div class='src'>座標：戸建て239棟（床面積200〜600㎡・中央値246㎡）の重心。"+
-         "Eco Botanic Club House から約82m</div>" }
+         "Eco Botanic Club House から約82m</div>" },
+
+  /* ---------- 立ち寄り先（モール・スーパー） ---------- */
+  { cat:"stop", kind:"stop", lat:1.5010, lng:103.7773, check:false, d:"right",
+    ja:"ミッドバレー・サウスキー", en:"Mid Valley Southkey",
+    addr:"Kota Southkey, Johor Bahru 81100",
+    body:"<div>JB最大級のショッピングモール。</div>"+
+         "<div class='cat'>館内に高級スーパー Village Grocer・無印良品・そごう</div>"+
+         "<div style='color:#666'>One of the largest malls in Johor Bahru. Village Grocer (premium supermarket), MUJI and Sogo are inside.</div>" },
+
+  { cat:"stop", kind:"stop", lat:1.4815, lng:103.6562, check:false, d:"right", zmin:12,
+    ja:"イオンモール ブキット・インダ", en:"AEON Mall Bukit Indah",
+    addr:"Bukit Indah, Iskandar Puteri",
+    body:"<div>日本のイオン。モール＋スーパー。</div>"+
+         "<div class='cat'>日本の食材が買える、在住日本人の定番</div>"+
+         "<div style='color:#666'>Japanese AEON mall and supermarket. The go-to place for Japanese groceries.</div>" },
+
+  { cat:"stop", kind:"stop", lat:1.4403, lng:103.6168, check:false, d:"left", zmin:14,
+    ja:"ジャヤ・グローサー（エコボタニック）", en:"Jaya Grocer, Eco Botanic",
+    addr:"Eco Botanic, Iskandar Puteri",
+    body:"<div>輸入食材の多い高級スーパー。</div>"+
+         "<div class='cat'>エコ・ボタニックの物件から約0.8km。同じ日にまとめられます</div>"+
+         "<div style='color:#666'>Premium supermarket with a wide imported range. About 0.8 km from the Eco Botanic property.</div>" },
+
+  { cat:"stop", kind:"stop", lat:1.4281, lng:103.6330, check:false, d:"right", zmin:14,
+    ja:"モール・オブ・メディニ", en:"Mall of Medini",
+    addr:"Medini, Iskandar Puteri",
+    body:"<div>アウトレット型のモール。レゴランド隣接。</div>"+
+         "<div class='cat'>物件が集まるメディニ／プテリハーバーに最も近いモール</div>"+
+         "<div style='color:#666'>Outlet-style mall next to Legoland. The closest mall to the Medini / Puteri Harbour cluster.</div>" }
 ];
 
 var map = L.map('map');
@@ -236,10 +276,10 @@ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom:19, attribution:'© OpenStreetMap contributors'
 }).addTo(map);
 
-function dotIcon(color, check){
+function dotIcon(color, check, isStop){
   return L.divIcon({
     className:'',
-    html:'<div class="pin-dot'+(check?' check':'')+'" style="background:'+color+'"></div>',
+    html:'<div class="'+(isStop?'pin-sq':'pin-dot')+(check?' check':'')+'" style="background:'+color+'"></div>',
     iconSize:[21,21], iconAnchor:[10.5,10.5]
   });
 }
@@ -248,7 +288,7 @@ var OFFSET = { left:[-12,0], right:[12,0], top:[0,-11], bottom:[0,11] };
 
 var group = [], markers = [];
 places.forEach(function(p){
-  var m = L.marker([p.lat,p.lng], { icon:dotIcon(COLOR[p.cat], p.check) }).addTo(map);
+  var m = L.marker([p.lat,p.lng], { icon:dotIcon(COLOR[p.cat], p.check, p.kind==='stop') }).addTo(map);
   markers.push(m);
   m.bindPopup(
     "<h3>"+p.ja+"<span class='en'>"+p.en+"</span></h3>"+
@@ -330,6 +370,9 @@ legend.onAdd = function(){
     "<details"+(window.innerWidth > 640 ? " open" : "")+">"+
       "<summary>ご希望カテゴリ <span class='en'>/ Category</span></summary>"+
       rows +
+      "<span class='sec'><span class='sq' style='background:"+COLOR.stop+"'></span>"+
+        CATNAME.stop[0]+" <span class='en'>/ "+CATNAME.stop[1]+"</span><br>"+
+        "<span class='en'>四角いピン＝モール・スーパー（物件ではありません）</span></span>"+
       "<span class='note'>縁が破線のピン＝場所の特定が未確定<br>"+
       "Dashed outline = location not yet confirmed</span>"+
     "</details>";
