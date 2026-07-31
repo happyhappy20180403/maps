@@ -103,7 +103,8 @@ var COLOR = {
   water:  "#2980b9",  // 水辺派・ヴィラ
   urban:  "#c0392b",  // 都会派・超高層
   office: "#8e44ad",  // オフィス
-  extra:  "#e67e22"   // 追加候補（カテゴリ未指定）
+  extra:  "#e67e22",  // 追加候補（カテゴリ未指定）
+  other:  "#7f8c8d"   // その他
 };
 
 var CATNAME = {
@@ -111,7 +112,8 @@ var CATNAME = {
   water:  ["水辺派・ヴィラ",            "Waterfront villa"],
   urban:  ["都会派・超高層",            "Urban high-rise"],
   office: ["オフィス",                  "Office"],
-  extra:  ["追加候補",                  "Additional"]
+  extra:  ["追加候補",                  "Additional"],
+  other:  ["その他",                    "Other"]
 };
 
 /* 密集していて全体表示では個別ラベルが入らないため、ズームで3段階に切り替える。
@@ -136,7 +138,7 @@ var places = [
     body:"<div>広大な敷地のリゾート型住宅地。自然環境を重視したヴィラ。</div>"+
          "<div style='color:#666'>A large resort-style residential estate with a natural setting.</div>" },
 
-  { cat:"nature", lat:1.3388, lng:103.5876, check:false, d:"bottom",
+  { cat:"other", lat:1.3388, lng:103.5876, check:false, d:"bottom",
     ja:"フォレストシティ", en:"Forest City",
     addr:"Forest City, Kampung Tanjung Kupang, Iskandar Puteri 81550",
     body:"<div>高層レジデンスが建ち並ぶ埋立地の街。</div>"+
@@ -319,7 +321,7 @@ var legend = L.control({position:'bottomright'});
 legend.onAdd = function(){
   var d = L.DomUtil.create('div','legend');
   L.DomEvent.disableClickPropagation(d);
-  var rows = ["nature","water","urban","office","extra"].map(function(k){
+  var rows = ["nature","water","urban","office","extra","other"].map(function(k){
     return "<span class='dot' style='background:"+COLOR[k]+"'></span>"+
            CATNAME[k][0]+" <span class='en'>/ "+CATNAME[k][1]+"</span>";
   }).join("<br>");
