@@ -57,6 +57,28 @@
   .leaflet-popup-content .warn { color:#b7791f; font-size:11.5px; }
   .leaflet-popup-content .src { color:#8a8a8a; font-size:10.5px; margin-top:5px;
                                 border-top:1px dotted #ddd; padding-top:4px; }
+
+  .legend summary { cursor:pointer; list-style:none; font-weight:bold; font-size:13px; color:#0f2c4c; }
+  .legend summary::-webkit-details-marker { display:none; }
+  .legend summary::after { content:" ▾"; color:#888; font-weight:normal; }
+  .legend details[open] summary::after { content:" ▴"; }
+
+  /* ---- スマホ（先方はスマホで開く想定）---- */
+  @media (max-width: 640px) {
+    header { padding:8px 12px; }
+    header h1 { font-size:15px; }
+    header p  { font-size:10.5px; margin-top:2px; }
+    .legend { font-size:10.5px; padding:6px 9px; max-width:none; width:auto; line-height:1.5; }
+    .legend summary { font-size:11.5px; }
+    .legend .dot { width:10px; height:10px; margin-right:5px; }
+    .legend .en { font-size:9.5px; }
+    .legend .note { font-size:9.5px; margin-top:5px; padding-top:4px; }
+    .labeltoggle { font-size:10.5px; padding:4px 7px; }
+    .labeltoggle .hint { display:none; }
+    .tip-label { font-size:10px; padding:1px 4px; }
+    .tip-label .en { font-size:9px; }
+    .leaflet-popup-content { font-size:12px; }
+  }
 </style>
 </head>
 <body>
@@ -98,7 +120,7 @@ var CATNAME = {
      zmin 12 … 全体表示ではイスカンダル・プテリのまとまりに含める
      zmin 14 … さらに密集（プテリハーバー4件・メディニ2件） */
 var GROUPS = [
-  { ja:"イスカンダル・プテリ 9件", en:"Iskandar Puteri (9)", lat:1.4236, lng:103.6384, d:"right",
+  { ja:"イスカンダル・プテリ 9件", en:"Iskandar Puteri (9)", lat:1.4236, lng:103.6384, d:"left",
     show:function(z){ return z < 12; } },
   { ja:"プテリハーバー 4件", en:"Puteri Harbour (4)", lat:1.41705, lng:103.65835, d:"right",
     show:function(z){ return z >= 12 && z < 14; } },
@@ -281,17 +303,40 @@ toggle.onAdd = function(){
 toggle.addTo(map);
 
 /* ---------- 凡例 ---------- */
+var legendBox = null, legendTouched = false, legendAuto = null;
+
+/* 画面幅に合わせて凡例を開閉する（スマホでは畳む）。
+   ただし利用者が自分で開閉したあとは触らない。
+   toggle イベントは非同期に飛ぶので、同期フラグではなく
+   「こちらが設定した値と一致するか」で自動/手動を見分ける */
+function syncLegend(){
+  if (!legendBox || legendTouched) return;
+  var want = window.innerWidth > 640;
+  if (legendBox.open !== want) { legendAuto = want; legendBox.open = want; }
+}
+
 var legend = L.control({position:'bottomright'});
 legend.onAdd = function(){
   var d = L.DomUtil.create('div','legend');
+  L.DomEvent.disableClickPropagation(d);
   var rows = ["nature","water","urban","office","extra"].map(function(k){
     return "<span class='dot' style='background:"+COLOR[k]+"'></span>"+
            CATNAME[k][0]+" <span class='en'>/ "+CATNAME[k][1]+"</span>";
   }).join("<br>");
+  /* スマホでは畳んでおく（開いたままだと画面の4割を占めるため） */
   d.innerHTML =
-    "<b>ご希望カテゴリ <span class='en'>/ Category</span></b>"+ rows +
-    "<span class='note'>縁が破線のピン＝場所の特定が未確定<br>"+
-    "Dashed outline = location not yet confirmed</span>";
+    "<details"+(window.innerWidth > 640 ? " open" : "")+">"+
+      "<summary>ご希望カテゴリ <span class='en'>/ Category</span></summary>"+
+      rows +
+      "<span class='note'>縁が破線のピン＝場所の特定が未確定<br>"+
+      "Dashed outline = location not yet confirmed</span>"+
+    "</details>";
+  legendBox = d.querySelector('details');
+  legendAuto = legendBox.open;
+  legendBox.addEventListener('toggle', function(){
+    // こちらが設定した値と違う＝利用者が自分で開閉した。以後は自動調整しない
+    if (legendBox.open !== legendAuto) legendTouched = true;
+  });
   return d;
 };
 legend.addTo(map);
@@ -301,11 +346,15 @@ function fitAll(){
   map.invalidateSize();
   var s = map.getSize();
   /* 余白は画面サイズに合わせる（狭い画面で固定値だと引きすぎるため） */
-  var pad = Math.max(18, Math.min(90, Math.min(s.x, s.y) * 0.12));
+  /* ラベルは横に伸びるので、横の余白を厚めに取る（とくに狭い画面） */
+  var padX = Math.max(20, Math.min(95, s.x * (s.x < 640 ? 0.17 : 0.12)));
+  var padY = Math.max(16, Math.min(80, s.y * 0.09));
   /* animate:false は必須。fitAll は初期・load・resize で連続して呼ばれるため、
      アニメーション付きだと後の呼び出しが前のアニメーションに打ち消されて反映されない */
-  map.fitBounds(group, { padding:[pad,pad], maxZoom:15, animate:false });
+  map.fitBounds(group, { paddingTopLeft:[padX,padY], paddingBottomRight:[padX,padY],
+                         maxZoom:15, animate:false });
   updateLabels();
+  syncLegend();
 }
 fitAll();
 window.addEventListener('load', fitAll);
