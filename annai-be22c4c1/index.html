@@ -33,6 +33,14 @@
   .card h3 .en { font-size:11.5px; color:var(--sub); font-weight:normal; margin-left:8px; }
   .tag { display:inline-block; background:var(--gold); color:#fff; border-radius:3px; font-size:11px;
          padding:1px 9px; margin-right:7px; vertical-align:2px; font-family:sans-serif; }
+  .card.sold { background:#faf7f5; }
+  .card.sold .photos img { filter:grayscale(70%); opacity:.75; }
+  .soldbar { background:#c0392b; color:#fff; border-radius:5px; padding:7px 12px; font-size:13px;
+             font-weight:bold; margin:0 0 10px; font-family:sans-serif; }
+  .soldbar small { font-weight:normal; font-size:11px; opacity:.9; }
+  .bookedbar { background:#1f9d6b; color:#fff; border-radius:5px; padding:7px 12px; font-size:13px;
+               font-weight:bold; margin:0 0 10px; font-family:sans-serif; }
+  .bookedbar small { font-weight:normal; font-size:11px; opacity:.9; }
   .photos { display:flex; gap:5px; margin:8px 0; }
   .photos img { width:33%; height:150px; object-fit:cover; border-radius:5px; background:#eef1f4; }
   .price { font-size:16.5px; color:var(--navy); font-weight:bold; margin:4px 0 2px; }
@@ -92,8 +100,9 @@
 <h2>とくにご覧いただきたい物件 <small>ご希望との相性順・リンク先でさらに多くの写真をご覧になれます</small></h2>
 <div class="body">
 
-<div class="card top">
-  <h3><span class="tag">第一候補</span>エメラルド・ベイ｜3階建 コーナー・アイランドヴィラ<span class="en">Emerald Bay @ Puteri Harbour</span></h3>
+<div class="card top sold">
+  <div class="soldbar">⚠ ご成約済みとなりました（2026年8月8日 確認）<small>　人気の高さの表れで、動きが非常に速い物件でした。ご参考として掲載を残しています</small></div>
+  <h3>エメラルド・ベイ｜3階建 コーナー・アイランドヴィラ<span class="en">Emerald Bay @ Puteri Harbour</span></h3>
   <div class="photos">
     <img src="https://my1-cdn.pgimgs.com/listing/500676847/UPHO.283917901.V800/Emerald-Bay-Puteri-Harbour-3-Storey-Corner-Island-Villa-For-Rent-Iskandar-Puteri-Nusajaya-Malaysia.jpg">
     <img src="https://my1-cdn.pgimgs.com/listing/500676847/UPHO.283917781.V800/Emerald-Bay-Puteri-Harbour-3-Storey-Corner-Island-Villa-For-Rent-Iskandar-Puteri-Nusajaya-Malaysia.jpg">
@@ -126,6 +135,7 @@
 </div>
 
 <div class="card">
+  <div class="bookedbar">✅ 内覧予定：8月13日（木）10:30〜<small>　お時間の変更をご希望の場合はお知らせください</small></div>
   <h3>エメラルド・ベイ｜テラスハウス<span class="en">Emerald Bay</span></h3>
   <div class="photos">
     <img src="https://my1-cdn.pgimgs.com/listing/501830807/UPHO.387267120.V800/Emerald-Bay-Puteri-Harbour-Johor-Bahru-Malaysia.jpg">
@@ -154,7 +164,8 @@
   <div class="agent sans">掲載：Kinki Teow ／ Evanne Wan</div>
 </div>
 
-<div class="card">
+<div class="card sold">
+  <div class="soldbar">⚠ 掲載のユニット（RM 8,000）はご成約済みです（2026年8月8日 確認）<small>　同タイプ・同間取りの募集は残っています。下の「他の募集」をご覧ください</small></div>
   <h3>サザン・マリーナ・レジデンス｜3+1寝室<span class="en">Southern Marina Residences</span></h3>
   <div class="photos">
     <img src="https://my1-cdn.pgimgs.com/listing/42296131/UPHO.256225093.V800/Southern-Marina-Residences-Iskandar-Puteri-Nusajaya-Malaysia.jpg">
@@ -171,6 +182,7 @@
 </div>
 
 <div class="card">
+  <div class="bookedbar">✅ 内覧予定：8月13日（木）16:00〜<small>　お時間の変更をご希望の場合はお知らせください</small></div>
   <h3>プテリ・コーブ・レジデンス｜大型住戸<span class="en">Puteri Cove Residences</span></h3>
   <div class="photos">
     <img src="https://my1-cdn.pgimgs.com/listing/500694570/UPHO.284132730.V800/Puteri-Cove-Residences-Iskandar-Puteri-Nusajaya-Malaysia.jpg">
