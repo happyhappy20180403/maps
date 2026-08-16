@@ -74,8 +74,8 @@
   details.shot summary { cursor:pointer; font-family:sans-serif; font-size:13px; color:#1f7a52; font-weight:bold; padding:7px 0; user-select:none; list-style-position:inside; }
   details.shot summary:hover { text-decoration:underline; }
   .vids { display:flex; flex-wrap:wrap; gap:8px; margin:8px 0 10px; }
-  .vids video { width:calc(33.33% - 6px); border-radius:5px; background:#000; }
-  @media (max-width:700px){ .vids video { width:100%; } }
+  .vids video { width:calc(33.33% - 6px); max-height:300px; object-fit:contain; border-radius:5px; background:#000; }
+  @media (max-width:700px){ .vids video { width:calc(50% - 4px); max-height:230px; } }
 </style>
 </head>
 <body>
